@@ -1,4 +1,4 @@
-"""Panel UI for Tally Connector following UI_INTERFACE_STANDARD.md."""
+"""Panel UI for Tally Connector following UI_INTERFACE_STANDARD.md and AUTH_AND_CREDENTIALS_STANDARD.md."""
 from __future__ import annotations
 from imperal_sdk import ui
 from app import ext
@@ -18,64 +18,70 @@ def _help_modal() -> ui.UINode:
         title="Connecting Tally",
         children=[
             ui.Text(
-                "1. Sign in to your Tally dashboard and navigate to API/Integration settings.\n"
-                "2. Generate an API Key, Token or OAuth credential.\n"
-                "3. Enter the details in the form below and click Connect.",
+                "1. Sign in to your Tally account and navigate to API Keys or Integrations settings.\n2. Generate a secure API Key or Access Token (provider API does not offer direct OAuth SSO).\n3. Paste the key below and click Connect.",
                 variant="body"
             )
         ]
     )
 
 @ext.panel("tally_sidebar", slot="left")
-async def main_panel(ctx) -> ui.UINode:
-    form = ui.Form(
-        submit_label="Connect Tally",
-        action=ui.Call("connect_tally"),
+async def tally_sidebar(ctx, **kwargs) -> ui.UINode:
+    return ui.Stack(
+        direction="v",
+        gap=3,
+        align="stretch",
         children=[
+            ui.Text("Tally", variant="heading"),
+            ui.Stack(
+                direction="v",
+                gap=1,
+                align="stretch",
+                children=[
+                    ui.Text("Manage your Tally connections and integrations.", variant="caption"),
+                ]
+            ),
+            ui.Divider(),
             ui.Stack(
                 direction="v",
                 gap=2,
+                align="stretch",
                 children=[
-                    ui.Stack(
-                        direction="v",
-                        gap=1,
+                    ui.Text("Connect via API Key / Access Token", variant="caption"),
+                    ui.Form(
+                        submit_label="Connect Tally",
+                        action=ui.Call("connect_tally"),
                         children=[
-                            ui.Text("Connection Label", variant="label"),
-                            ui.Input(param_name="label", placeholder="e.g. Production Account"),
+                            ui.Stack(
+                                direction="v",
+                                gap=2,
+                                align="stretch",
+                                children=[
+                                    ui.Stack(
+                                        direction="v",
+                                        gap=1,
+                                        align="stretch",
+                                        children=[
+                                            ui.Text("Connection Label", variant="label"),
+                                            ui.Input(param_name="label", placeholder="e.g. Production Tally"),
+                                        ]
+                                    ),
+                                    ui.Stack(
+                                        direction="v",
+                                        gap=1,
+                                        align="stretch",
+                                        children=[
+                                            ui.Text("API Key / Access Token", variant="label"),
+                                            ui.Input(param_name="api_key", placeholder="Paste API Key or Access Token"),
+                                        ]
+                                    ),
+                                ]
+                            )
                         ]
                     ),
-                    ui.Stack(
-                        direction="v",
-                        gap=1,
-                        children=[
-                            ui.Text("API Key / Access Token", variant="label"),
-                            ui.Input(param_name="api_key", placeholder="Paste API Key or Token"),
-                        ]
-                    ),
-                    ui.Stack(
-                        direction="v",
-                        gap=1,
-                        children=[
-                            ui.Text("Custom Base URL (optional)", variant="label"),
-                            ui.Input(param_name="base_url", placeholder="Leave empty for default"),
-                        ]
-                    )
                 ]
-            )
-        ]
-    )
-
-    return ui.Stack(
-        direction="v",
-        gap=2,
-        children=[
-            ui.Heading("Tally Connector", level=3),
-            ui.Text("Connect and manage your Tally workspace.", variant="caption"),
-            ui.Divider(),
-            form,
-            ui.Divider(),
+            ),
             _help_modal(),
-            ui.Divider(),
-            _settings_button()
+            ui.Spacer(),
+            _settings_button(),
         ]
     )
