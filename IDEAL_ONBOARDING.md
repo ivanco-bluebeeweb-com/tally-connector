@@ -1,3 +1,9 @@
-# ConvertKit Connector - IDEAL_ONBOARDING.md
+# Tally Connector — Ideal Onboarding & First Launch
 
-Standard documentation for ConvertKit Connector in Imperal Cloud.
+**Compliance:** ONBOARDING_FIRST_LAUNCH_STANDARD.md
+
+## Шаги онбординга
+1. **Первый вход:** Отображение понятного описания назначения коннектора Tally.
+2. **Ввод учетных данных:** Понятная форма с контекстными плейсхолдерами и ссылкой на документацию получения API-ключей/OAuth Tally.
+3. **Проверка связи:** Автоматический тестовый вызов (`GET /forms`). При успехе — переход к рабочей панели, при ошибке — понятная диагностика без стектрейсов.
+4. **Empty State:** Если данных нет, показ пошаговой подсказки по созданию первой сущности.
