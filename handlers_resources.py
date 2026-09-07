@@ -14,7 +14,7 @@ async def list_forms(params: ListFormsParams, ctx) -> ActionResult:
         client = await resolve_client(ctx, params.connection_id)
         raw_forms = await client.list_forms()
         forms = [FormRecord(id=str(f.get("id", "")), name=f.get("name", "Untitled Form"), status=f.get("status", "published"), submissions_count=f.get("submissionsCount", 0), raw=f) for f in raw_forms]
-        return ActionResult.ok(FormList(forms=forms, total=len(forms)), summary=f"Loaded {len(forms)} Tally forms.")
+        return ActionResult.success(FormList(forms=forms, total=len(forms)), summary=f"Loaded {len(forms)} Tally forms.")
     except Exception as e:
         return ActionResult.error(f"Error listing Tally forms: {e}")
 
@@ -25,7 +25,7 @@ async def get_form(params: GetFormParams, ctx) -> ActionResult:
         f = await client.get_form(params.form_id)
         if not f: return ActionResult.error(f"Form {params.form_id} not found.")
         rec = FormRecord(id=str(f.get("id", "")), name=f.get("name", "Untitled Form"), status=f.get("status", "published"), submissions_count=f.get("submissionsCount", 0), raw=f)
-        return ActionResult.ok(rec, summary=f"Loaded Tally form: {rec.name}")
+        return ActionResult.success(rec, summary=f"Loaded Tally form: {rec.name}")
     except Exception as e:
         return ActionResult.error(f"Error fetching Tally form: {e}")
 
@@ -35,7 +35,7 @@ async def list_submissions(params: ListSubmissionsParams, ctx) -> ActionResult:
         client = await resolve_client(ctx, params.connection_id)
         raw_sub = await client.list_submissions(params.form_id)
         subs = [SubmissionRecord(id=str(s.get("id", "")), form_id=params.form_id, created_at=s.get("createdAt"), answers=s.get("answers", {})) for s in raw_sub]
-        return ActionResult.ok(SubmissionList(submissions=subs, total=len(subs)), summary=f"Loaded {len(subs)} submissions for form {params.form_id}.")
+        return ActionResult.success(SubmissionList(submissions=subs, total=len(subs)), summary=f"Loaded {len(subs)} submissions for form {params.form_id}.")
     except Exception as e:
         return ActionResult.error(f"Error listing submissions: {e}")
 
@@ -49,6 +49,6 @@ async def audit_survey_health(params: ConnectionIdParams, ctx) -> ActionResult:
         recs = []
         if active == 0: recs.append("No active published forms found in Tally.")
         if total_sub == 0: recs.append("Zero submissions received across forms; verify form links.")
-        return ActionResult.ok(HealthAuditReport(status="healthy" if active > 0 else "attention_needed", active_forms=active, total_submissions=total_sub, recommendations=recs), summary="Tally survey health audit complete.")
+        return ActionResult.success(HealthAuditReport(status="healthy" if active > 0 else "attention_needed", active_forms=active, total_submissions=total_sub, recommendations=recs), summary="Tally survey health audit complete.")
     except Exception as e:
         return ActionResult.error(f"Error auditing Tally health: {e}")
