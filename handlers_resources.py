@@ -9,7 +9,7 @@ from schemas import (
 from handlers_connection import resolve_client
 
 @chat.function("list_forms", "List forms in Tally workspace.", action_type="read", chain_callable=True, event="tally-connector.list_forms", effects=["read:forms"], data_model=FormList)
-async def list_forms(params: ListFormsParams, ctx) -> ActionResult:
+async def list_forms(ctx, params: ListFormsParams) -> ActionResult:
     try:
         client = await resolve_client(ctx, params.connection_id)
         raw_forms = await client.list_forms()
@@ -19,7 +19,7 @@ async def list_forms(params: ListFormsParams, ctx) -> ActionResult:
         return ActionResult.error(f"Error listing Tally forms: {e}")
 
 @chat.function("get_form", "Get details of one Tally form.", action_type="read", chain_callable=True, event="tally-connector.get_form", effects=["read:form"], data_model=FormRecord)
-async def get_form(params: GetFormParams, ctx) -> ActionResult:
+async def get_form(ctx, params: GetFormParams) -> ActionResult:
     try:
         client = await resolve_client(ctx, params.connection_id)
         f = await client.get_form(params.form_id)
@@ -30,7 +30,7 @@ async def get_form(params: GetFormParams, ctx) -> ActionResult:
         return ActionResult.error(f"Error fetching Tally form: {e}")
 
 @chat.function("list_submissions", "List submissions for one Tally form.", action_type="read", chain_callable=True, event="tally-connector.list_submissions", effects=["read:submissions"], data_model=SubmissionList)
-async def list_submissions(params: ListSubmissionsParams, ctx) -> ActionResult:
+async def list_submissions(ctx, params: ListSubmissionsParams) -> ActionResult:
     try:
         client = await resolve_client(ctx, params.connection_id)
         raw_sub = await client.list_submissions(params.form_id)
@@ -40,7 +40,7 @@ async def list_submissions(params: ListSubmissionsParams, ctx) -> ActionResult:
         return ActionResult.error(f"Error listing submissions: {e}")
 
 @chat.function("audit_survey_health", "Audit active forms and submission volume in Tally.", action_type="read", chain_callable=True, event="tally-connector.audit_survey_health", effects=["read:analytics"], data_model=HealthAuditReport)
-async def audit_survey_health(params: ConnectionIdParams, ctx) -> ActionResult:
+async def audit_survey_health(ctx, params: ConnectionIdParams) -> ActionResult:
     try:
         client = await resolve_client(ctx, params.connection_id)
         raw_forms = await client.list_forms()

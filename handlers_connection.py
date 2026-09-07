@@ -34,7 +34,7 @@ async def resolve_client(ctx, connection_id: str = "") -> TallyClient:
     return TallyClient(api_key=conn["api_key"], base_url=conn.get("base_url", ""))
 
 @chat.function("connect_tally", "Connect Tally account via API Key.", action_type="write", chain_callable=True, event="tally-connector.connect_tally", effects=["create:connection"], data_model=ConnectionRecord)
-async def connect_tally(params: ConnectParams, ctx) -> ActionResult:
+async def connect_tally(ctx, params: ConnectParams) -> ActionResult:
     client = TallyClient(api_key=params.api_key, base_url=params.base_url)
     res = await client.verify_auth()
     if res.get("status") == "error":
@@ -52,7 +52,7 @@ async def connect_tally(params: ConnectParams, ctx) -> ActionResult:
     return ActionResult.success(ConnectionRecord(**record), summary=f"Connected Tally account: {record['label']}")
 
 @chat.function("list_connections", "List connected Tally accounts.", action_type="read", chain_callable=True, event="tally-connector.list_connections", effects=["read:connections"], data_model=ConnectionList)
-async def list_connections(params: NoParams, ctx) -> ActionResult:
+async def list_connections(ctx, params: NoParams) -> ActionResult:
     conns = await get_connections_list(ctx)
     records = [
         ConnectionRecord(
@@ -67,7 +67,7 @@ async def list_connections(params: NoParams, ctx) -> ActionResult:
     return ActionResult.success(ConnectionList(connections=records, total=len(records)), summary=f"Found {len(records)} Tally connections.")
 
 @chat.function("disconnect_tally", "Disconnect Tally account.", action_type="destructive", chain_callable=True, event="tally-connector.disconnect_tally", effects=["delete:connection"], data_model=DeleteResult)
-async def disconnect_tally(params: ConnectionIdParams, ctx) -> ActionResult:
+async def disconnect_tally(ctx, params: ConnectionIdParams) -> ActionResult:
     conns = await get_connections_list(ctx)
     deleted = False
     for c in conns:
