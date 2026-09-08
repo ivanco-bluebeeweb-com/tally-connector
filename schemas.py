@@ -66,3 +66,17 @@ class HealthAuditReport(BaseModel):
     active_forms: int
     total_submissions: int
     recommendations: List[str] = Field(default_factory=list)
+
+class CreateFormParams(BaseModel):
+    connection_id: str = Field(default="", description="Optional connection ID.")
+    name: str = Field(description="Title / Name of the form.")
+    status: str = Field(default="PUBLISHED", description="Form status: DRAFT or PUBLISHED.")
+
+class UpdateFormParams(BaseModel):
+    connection_id: str = Field(default="", description="Optional connection ID.")
+    form_id: str = Field(description="Tally form ID to update.")
+    name: str = Field(description="New title / Name of the form.")
+
+class DeleteFormParams(BaseModel):
+    connection_id: str = Field(default="", description="Optional connection ID.")
+    form_id: str = Field(description="Tally form ID to delete.")

@@ -3,6 +3,7 @@ from __future__ import annotations
 from imperal_sdk import ActionResult
 from app import chat
 from schemas import (
+    DeleteResult,
     ListFormsParams, GetFormParams, ListSubmissionsParams, ConnectionIdParams,
     FormList, FormRecord, SubmissionList, SubmissionRecord, HealthAuditReport
 )
@@ -52,3 +53,47 @@ async def audit_survey_health(ctx, params: ConnectionIdParams) -> ActionResult:
         return ActionResult.success(HealthAuditReport(status="healthy" if active > 0 else "attention_needed", active_forms=active, total_submissions=total_sub, recommendations=recs), summary="Tally survey health audit complete.")
     except Exception as e:
         return ActionResult.error(f"Error auditing Tally health: {e}")
+
+
+@chat.function("create_form", "Create a new form in Tally.", action_type="write", chain_callable=True, event="tally-connector.create_form", effects=["create:form"], data_model=FormRecord)
+async def create_form(ctx, params: CreateFormParams) -> ActionResult:
+    client = await resolve_client(ctx, params.connection_id)
+    try:
+        raw = await client.create_form(name=params.name, status=params.status)
+        rec = FormRecord(
+            id=str(raw.get("id", "")),
+            name=raw.get("name") or params.name,
+            status=raw.get("status") or params.status,
+            submissions_count=0,
+            raw=raw
+        )
+        return ActionResult.success(rec, summary=f"Created form '{rec.name}' ({rec.id}) in Tally.")
+    except Exception as e:
+        return ActionResult.error(f"Failed to create form in Tally: {e}")
+
+@chat.function("update_form", "Update an existing form title in Tally.", action_type="write", chain_callable=True, event="tally-connector.update_form", effects=["update:form"], data_model=FormRecord)
+async def update_form(ctx, params: UpdateFormParams) -> ActionResult:
+    client = await resolve_client(ctx, params.connection_id)
+    try:
+        raw = await client.update_form(form_id=params.form_id, name=params.name)
+        rec = FormRecord(
+            id=str(raw.get("id", params.form_id)),
+            name=raw.get("name") or params.name,
+            status=raw.get("status") or "UNKNOWN",
+            submissions_count=raw.get("submissionsCount", 0),
+            raw=raw
+        )
+        return ActionResult.success(rec, summary=f"Updated form '{rec.name}' ({rec.id}) in Tally.")
+    except Exception as e:
+        return ActionResult.error(f"Failed to update form in Tally: {e}")
+
+@chat.function("delete_form", "Permanently delete a form from Tally.", action_type="destructive", chain_callable=True, event="tally-connector.delete_form", effects=["delete:form"], data_model=DeleteResult)
+async def delete_form(ctx, params: DeleteFormParams) -> ActionResult:
+    client = await resolve_client(ctx, params.connection_id)
+    try:
+        ok = await client.delete_form(form_id=params.form_id)
+        if ok:
+            return ActionResult.success(DeleteResult(success=True, message=f"Form {params.form_id} deleted successfully."), summary=f"Deleted form {params.form_id} from Tally.")
+        return ActionResult.error(f"Failed to delete form {params.form_id}")
+    except Exception as e:
+        return ActionResult.error(f"Failed to delete form in Tally: {e}")

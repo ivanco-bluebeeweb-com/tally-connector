@@ -46,3 +46,57 @@ class TallyClient:
                 data = resp.json()
                 return data if isinstance(data, list) else data.get("submissions", [])
             return []
+
+    async def create_form(self, name: str, status: str = "PUBLISHED") -> dict[str, Any]:
+        import uuid
+        block_uuid = str(uuid.uuid4())
+        group_uuid = str(uuid.uuid4())
+        payload = {
+            "status": status,
+            "blocks": [
+                {
+                    "uuid": block_uuid,
+                    "type": "FORM_TITLE",
+                    "groupUuid": group_uuid,
+                    "groupType": "TEXT",
+                    "payload": {
+                        "title": name,
+                        "html": name
+                    }
+                }
+            ]
+        }
+        async with httpx.AsyncClient(timeout=self.timeout) as client:
+            resp = await client.post(f"{self.base_url}/forms", headers=self.headers, json=payload)
+            if resp.status_code in (200, 201):
+                return resp.json()
+            raise ValueError(f"HTTP {resp.status_code}: {resp.text}")
+
+    async def update_form(self, form_id: str, name: str) -> dict[str, Any]:
+        import uuid
+        block_uuid = str(uuid.uuid4())
+        group_uuid = str(uuid.uuid4())
+        payload = {
+            "blocks": [
+                {
+                    "uuid": block_uuid,
+                    "type": "FORM_TITLE",
+                    "groupUuid": group_uuid,
+                    "groupType": "TEXT",
+                    "payload": {
+                        "title": name,
+                        "html": name
+                    }
+                }
+            ]
+        }
+        async with httpx.AsyncClient(timeout=self.timeout) as client:
+            resp = await client.patch(f"{self.base_url}/forms/{form_id}", headers=self.headers, json=payload)
+            if resp.status_code == 200:
+                return resp.json()
+            raise ValueError(f"HTTP {resp.status_code}: {resp.text}")
+
+    async def delete_form(self, form_id: str) -> bool:
+        async with httpx.AsyncClient(timeout=self.timeout) as client:
+            resp = await client.delete(f"{self.base_url}/forms/{form_id}", headers=self.headers)
+            return resp.status_code in (200, 204)

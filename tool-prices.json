@@ -5,5 +5,10 @@
   "list_forms": 1,
   "get_form": 1,
   "list_submissions": 1,
-  "audit_survey_health": 5
+  "audit_survey_health": 5,
+  "actions": {
+    "create_form": 12,
+    "update_form": 12,
+    "delete_form": 12
+  }
 }

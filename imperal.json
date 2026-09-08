@@ -172,6 +172,109 @@
       "long_running": false,
       "scopes": [],
       "owner_chat_tool": "tool_tally-connector_chat"
+    },
+    {
+      "name": "create_form",
+      "description": "Create a new form in Tally.",
+      "action_type": "write",
+      "chain_callable": true,
+      "effects": [
+        "create:form"
+      ],
+      "id_projection": "",
+      "params_schema": {
+        "type": "object",
+        "properties": {
+          "connection_id": {
+            "type": "string",
+            "default": "",
+            "description": "Optional connection ID."
+          },
+          "name": {
+            "type": "string",
+            "description": "Form name/title."
+          },
+          "status": {
+            "type": "string",
+            "default": "PUBLISHED",
+            "description": "Form status: DRAFT or PUBLISHED."
+          }
+        },
+        "required": [
+          "name"
+        ]
+      },
+      "return_schema": {
+        "type": "object",
+        "properties": {}
+      }
+    },
+    {
+      "name": "update_form",
+      "description": "Update form title in Tally.",
+      "action_type": "write",
+      "chain_callable": true,
+      "effects": [
+        "update:form"
+      ],
+      "id_projection": "",
+      "params_schema": {
+        "type": "object",
+        "properties": {
+          "connection_id": {
+            "type": "string",
+            "default": "",
+            "description": "Optional connection ID."
+          },
+          "form_id": {
+            "type": "string",
+            "description": "Tally form ID to update."
+          },
+          "name": {
+            "type": "string",
+            "description": "New form name/title."
+          }
+        },
+        "required": [
+          "form_id",
+          "name"
+        ]
+      },
+      "return_schema": {
+        "type": "object",
+        "properties": {}
+      }
+    },
+    {
+      "name": "delete_form",
+      "description": "Permanently delete a form from Tally.",
+      "action_type": "destructive",
+      "chain_callable": true,
+      "effects": [
+        "delete:form"
+      ],
+      "id_projection": "",
+      "params_schema": {
+        "type": "object",
+        "properties": {
+          "connection_id": {
+            "type": "string",
+            "default": "",
+            "description": "Optional connection ID."
+          },
+          "form_id": {
+            "type": "string",
+            "description": "Tally form ID to delete."
+          }
+        },
+        "required": [
+          "form_id"
+        ]
+      },
+      "return_schema": {
+        "type": "object",
+        "properties": {}
+      }
     }
   ],
   "signals": [],
